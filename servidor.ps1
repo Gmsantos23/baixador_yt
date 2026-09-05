@@ -505,6 +505,29 @@ function Atualizar-Estado {
     }
 }
 
+function Ler-AreaTransferencia {
+    # Quem le a area de transferencia e o PowerShell, nao o navegador.
+    # Pela pagina, o Chrome obriga a clicar num chip "Colar" toda vez, e
+    # isso custava um clique extra em cada download. Aqui nao passa por
+    # navegador nenhum: e a area de transferencia do Windows, direto.
+    # Devolve ok=$false so quando nao deu para ler de jeito nenhum -
+    # area vazia e coisa diferente de area ilegivel.
+    # A area de transferencia do Windows so aceita um programa por vez. Se o
+    # navegador ainda estiver segurando ela no instante do clique, a leitura
+    # falha - e isso acontece de verdade, apareceu nos testes justamente
+    # quando copiar e clicar ficaram colados. Insistir por alguns instantes
+    # resolve sem ele perceber. Sao no maximo 0,4s.
+    for ($tentativa = 0; $tentativa -lt 6; $tentativa++) {
+        try { return @{ ok = $true; texto = [string](Get-Clipboard -Raw) } } catch { }
+        try {
+            Add-Type -AssemblyName System.Windows.Forms
+            return @{ ok = $true; texto = [string][System.Windows.Forms.Clipboard]::GetText() }
+        } catch { }
+        Start-Sleep -Milliseconds 60
+    }
+    return @{ ok = $false; texto = '' }
+}
+
 function Resolver-Pasta($escolhida, $idPadrao, $nomePadrao) {
     # Tenta a pasta escrita no topo do arquivo. Se ela nao puder ser criada
     # (HD externo desligado, pendrive fora, caminho digitado errado), volta
@@ -740,20 +763,42 @@ while ($true) {
             }
 
             '/iniciar' {
-                $ok = $false
+                $ok     = $false
+                $motivo = ''
+                $url    = ''
                 try {
                     $pedido = $corpo | ConvertFrom-Json
                     $url    = ([string]$pedido.url).Trim()
                     $tipo   = [string]$pedido.tipo
-                    if ($url -match '^https?://' -and $script:Proc -eq $null -and $script:ProcPreparo -eq $null) {
-                        Iniciar-Download $url $tipo
-                        $ok = $true
+
+                    # Sem url no pedido = o caminho normal. A pagina so manda o
+                    # tipo e quem busca o link e o servidor, aqui, na area de
+                    # transferencia do Windows. Um clique e acabou.
+                    if (-not $url) {
+                        $area = Ler-AreaTransferencia
+                        if (-not $area.ok) {
+                            $motivo = 'sem-area'
+                        } else {
+                            # Pega o primeiro endereco que aparecer. Assim
+                            # funciona mesmo se ele copiar texto em volta do link.
+                            $achado = [regex]::Match([string]$area.texto, 'https?://\S+')
+                            if ($achado.Success) { $url = $achado.Value } else { $motivo = 'sem-link' }
+                        }
+                    }
+
+                    if ($url -match '^https?://') {
+                        if ($script:Proc -eq $null -and $script:ProcPreparo -eq $null) {
+                            Iniciar-Download $url $tipo
+                            $ok = $true
+                        }
+                    } elseif (-not $motivo) {
+                        $motivo = 'sem-link'
                     }
                 } catch {
                     $script:Fase = 'erro'
                     $script:Erro = 'Nao consegui comecar. Tente de novo.'
                 }
-                Responder-Json $fluxo @{ ok = $ok }
+                Responder-Json $fluxo @{ ok = $ok; motivo = $motivo; url = $url }
             }
 
             '/cancelar' {

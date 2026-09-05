@@ -160,7 +160,6 @@ function idDoVideo(u){
   var m = String(u).match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/);
   return m ? m[1] : null;
 }
-function pareceLink(t){ return /^https?:\/\/\S+$/i.test(String(t).trim()); }
 
 /* ---------- tela inicial ---------- */
 
@@ -181,25 +180,13 @@ for (var i=0;i<pilulas.length;i++){
   });
 }
 
-botao.addEventListener("click", function(){
-  // se a caixa já apareceu e ele digitou algo, usa o que está nela
-  if (campo.value.trim()){ comecar(); return; }
+botao.addEventListener("click", comecar);
 
-  if (navigator.clipboard && navigator.clipboard.readText){
-    navigator.clipboard.readText().then(function(t){
-      if (pareceLink(t)){ campo.value = t.trim(); comecar(); }
-      else { avisar("Copie o link do vídeo no YouTube e clique de novo."); }
-    }).catch(abrirCampo);
-  } else {
-    abrirCampo();
-  }
-});
-
-// só um aviso: ele esqueceu de copiar o link. A caixa não ajuda aqui.
+// ele esqueceu de copiar o link. A caixa não ajudaria aqui.
 function avisar(t){ dica.textContent = t; dica.className = "dica alerta"; }
 
-// o navegador não deixa ler o que foi copiado (permissão negada ou
-// navegador antigo). Sem a caixa, o botão não teria como funcionar.
+// só chega aqui se o Windows não deixou ler a área de transferência.
+// Sem a caixa, o botão ficaria sem nenhuma saída.
 function abrirCampo(){
   campoAberto = true;
   campo.hidden = false;
@@ -209,23 +196,35 @@ function abrirCampo(){
 }
 
 function comecar(){
-  var url = campo.value.trim();
-  if (!pareceLink(url)){ avisar("Esse não parece ser um link de vídeo."); return; }
-
-  var id = idDoVideo(url);
-  document.getElementById("capa").src = id ? ("https://i.ytimg.com/vi/"+id+"/hqdefault.jpg") : "";
-  document.getElementById("baixando-titulo").textContent = "";
-  document.getElementById("porcento").textContent = "0%";
-  document.getElementById("barra").style.width = "0%";
-  document.getElementById("fase-texto").textContent = "Baixando…";
-  mostrar("baixando");
-  congela = Date.now() + 2500;
+  // Normalmente vai vazio: quem lê o link copiado é o servidor, em
+  // PowerShell. Só vai preenchido se a caixa de emergência apareceu.
+  var manual = campo.value.trim();
+  botao.disabled = true;
+  dica.textContent = ""; dica.className = "dica";
 
   fetch("/iniciar", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({url:url, tipo:tipo})
-  }).catch(falhouServidor);
+    body: JSON.stringify({url:manual, tipo:tipo})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    botao.disabled = false;
+    if (!res.ok){
+      if (res.motivo === "sem-area") abrirCampo();
+      else avisar("Copie o link do vídeo no YouTube e clique de novo.");
+      return;
+    }
+    var id = idDoVideo(res.url);
+    document.getElementById("capa").src = id ? ("https://i.ytimg.com/vi/"+id+"/hqdefault.jpg") : "";
+    document.getElementById("baixando-titulo").textContent = "";
+    document.getElementById("porcento").textContent = "0%";
+    document.getElementById("barra").style.width = "0%";
+    document.getElementById("fase-texto").textContent = "Baixando…";
+    congela = Date.now() + 2000;
+    mostrar("baixando");
+  })
+  .catch(function(){ botao.disabled = false; falhouServidor(); });
 }
 
 /* ---------- botões das outras telas ---------- */

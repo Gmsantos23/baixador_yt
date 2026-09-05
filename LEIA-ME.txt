@@ -67,9 +67,9 @@ COMO LEVAR PARA O PC DELE
    - O navegador abre. Espere a barra "Preparando" chegar ao fim.
 
 5. Faca um teste com um video qualquer, com ele do lado.
-   Se o navegador perguntar sobre "area de transferencia" / "clipboard",
-   clique em PERMITIR. E isso que faz o botao "Colar link e baixar"
-   funcionar com um clique so.
+   Nao vai aparecer nenhum pedido de permissao. Quem le o link copiado
+   e o servidor em PowerShell, nao a pagina - entao o navegador nao
+   entra nessa e o botao funciona com um clique so.
 
 6. Botao direito no atalho > "Fixar na barra de tarefas".
 
