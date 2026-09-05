@@ -1,0 +1,252 @@
+BAIXADOR - instrucoes para quem instala (nao para o vovo)
+=========================================================
+
+O QUE PRECISA ESTAR INSTALADO NO PC DELE
+----------------------------------------
+Nada. Zero. Nao precisa Python, nem Node, nem instalador, nem senha de
+administrador. Tudo que o programa usa ja vem dentro do Windows:
+
+  powershell.exe   o motor            (vem no Windows)
+  wscript.exe      o atalho invisivel (vem no Windows)
+  o navegador      qualquer um        (Edge, Chrome, Firefox)
+
+Na primeira vez ele baixa 3 programinhas para dentro da propria pasta,
+em dados\programas\. Nao sao instalados: sao arquivos soltos.
+
+  yt-dlp.exe    17 MB   quem sabe conversar com o YouTube
+  ffmpeg.exe   139 MB   junta video + som e converte para mp3
+  ffprobe.exe  139 MB   acompanha o ffmpeg
+  deno.exe      93 MB   roda o JavaScript que o YouTube passou a exigir
+
+Total: ~390 MB de programas, uma vez so.
+
+Nao mexe no registro do Windows, nao mexe no PATH, nao pede firewall
+(so escuta em 127.0.0.1, que e o proprio computador). Para desinstalar,
+apague esta pasta e o atalho. Nao sobra nada.
+
+Windows 7 SP1 para cima serve. Se o Windows dele for de 32 bits, o
+programa percebe sozinho, pula o ffmpeg e o deno (que so existem em
+64 bits) e baixa em formato que ja vem pronto - continua funcionando,
+so nao converte para mp3 (guarda o som como m4a, que toca igual).
+
+
+COMO LEVAR PARA O PC DELE
+-------------------------
+1. Copie SO estes 4 arquivos (juntos dao 42 KB, cabem no WhatsApp):
+
+       Baixador.vbs
+       servidor.ps1
+       pagina.html
+       LEIA-ME.txt
+
+   NAO copie a pasta "dados". Ela pesa 388 MB e o PC dele baixa tudo
+   sozinho, na versao certa. Isso importa: se o Windows dele for de
+   32 bits, copiar os programas daqui (64 bits) quebraria tudo. Baixando
+   la, ele pega a versao certa automaticamente.
+
+   Excecao: se a internet dele for muito ruim, copie a pasta inteira por
+   pendrive. So funciona se os dois Windows forem de 64 bits.
+
+2. Coloque a pasta num lugar fixo, ex.: C:\Baixador
+   Evite Area de Trabalho e Downloads, onde e facil arrastar sem querer.
+   (Se um dia mudar de lugar, o atalho se conserta sozinho na proxima vez
+   que abrir - o programa percebe que a pasta mudou.)
+
+3. Se voce mandou por WhatsApp, e-mail ou Drive, o Windows marca os
+   arquivos como "vindos da internet". Isso NAO impede de funcionar
+   (foi testado), mas pode aparecer um aviso azul do SmartScreen na
+   primeira vez. Se aparecer, clique em "Mais informacoes" e depois em
+   "Executar assim mesmo".
+
+   Para evitar o aviso: antes de descompactar o ZIP, clique com o botao
+   direito nele > Propriedades > marque "Desbloquear" > OK.
+
+4. De dois cliques em "Baixador.vbs" UMA vez, com internet ligada.
+   - Cria sozinho o atalho "Baixar Video" na area de trabalho.
+   - Baixa sozinho o yt-dlp, o ffmpeg e o deno (~390 MB, so na 1a vez).
+   - O navegador abre. Espere a barra "Preparando" chegar ao fim.
+
+5. Faca um teste com um video qualquer, com ele do lado.
+   Se o navegador perguntar sobre "area de transferencia" / "clipboard",
+   clique em PERMITIR. E isso que faz o botao "Colar link e baixar"
+   funcionar com um clique so.
+
+6. Botao direito no atalho > "Fixar na barra de tarefas".
+
+Pronto. Nao precisa fazer mais nada nunca.
+
+
+SE O ANTIVIRUS RECLAMAR
+-----------------------
+O yt-dlp.exe as vezes e acusado por engano (falso positivo) por antivirus,
+porque e um programa Python empacotado - varios virus usam o mesmo
+empacotador. Ele nao tem virus: vem direto do repositorio oficial do
+projeto no GitHub.
+
+Se for bloqueado ou sumir da pasta dados\programas, adicione a pasta do
+Baixador na lista de excecoes do antivirus. No Windows Defender:
+  Seguranca do Windows > Protecao contra virus > Gerenciar configuracoes
+  > Exclusoes > Adicionar uma exclusao > Pasta > escolha C:\Baixador
+Depois apague a pasta "dados" e abra o programa de novo.
+
+
+COMO O VOVO USA
+---------------
+1. No YouTube, ele copia o endereco do video.
+2. Clica no icone vermelho "Baixar Video" na area de trabalho.
+3. Clica no botao verde grande.
+4. Espera a barra encher e clica em "Ver o arquivo".
+
+Os videos ficam em:  Videos > YouTube
+As musicas ficam em: Musicas > YouTube
+
+Neste computador a pasta Musicas esta redirecionada para o OneDrive
+(C:\Users\Gmsan\OneDrive\Music\YouTube). E a pasta que o Explorer mostra
+como "Musicas", entao e onde ele vai procurar - esta certo assim. Se nao
+quiser as musicas na nuvem, tire a pasta Musicas do OneDrive nas opcoes
+do proprio OneDrive.
+
+
+POR QUE NAO E SO UM ARQUIVO .HTML
+---------------------------------
+Um HTML sozinho, aberto pelo navegador, nao consegue baixar do YouTube -
+o navegador bloqueia. Os sites e APIs "graficos" que fazem isso quebram
+em poucas semanas.
+
+O unico jeito que continua funcionando ao longo dos anos e o yt-dlp, que
+recebe atualizacao toda semana. Entao a pasta tem:
+
+  pagina.html    a tela que o vovo ve (pode mexer no visual a vontade)
+  servidor.ps1   o programa invisivel que faz o download
+  Baixador.vbs   o atalho que liga tudo sem mostrar janela preta
+  dados\         yt-dlp, ffmpeg e arquivos temporarios (criada sozinha)
+
+Nada disso aparece para ele. Ele so ve um icone e uma tela.
+
+
+ATUALIZAR O PROGRAMA DE CASA (GitHub)
+-------------------------------------
+Repositorio: https://github.com/Gmsantos23/baixador_yt
+
+Toda vez que ele abre o Baixador, o programa compara servidor.ps1 e
+pagina.html com os do repositorio e se atualiza sozinho. Voce conserta
+e melhora as coisas da sua casa, sem ir ate o PC dele.
+
+Como publicar uma mudanca (nao precisa instalar o git):
+  1. Abra o arquivo no site do GitHub.
+  2. Clique no lapis (Edit), mude o que quiser.
+  3. Commit changes.
+  4. Na proxima vez que ele abrir o programa, ja vem corrigido.
+
+O que EU NAO atualizo, de proposito:
+
+  Baixador.vbs   e a porta de entrada. Se um arquivo quebrado chegasse
+                 nele, o programa morreria no PC dele sem jeito de
+                 consertar de longe. Ele fica congelado.
+
+Protecoes que existem:
+
+  - Antes de instalar um servidor.ps1 novo, o programa confere se o
+    PowerShell compila. Se voce commitar um erro de digitacao, ele
+    RECUSA a versao nova e continua com a que funcionava. Testado.
+  - A versao anterior fica guardada em dados\backup\.
+  - Sem internet ou GitHub fora do ar: ele desiste em silencio e abre
+    normal com o que ja esta no disco.
+  - Crie o arquivo dados\nao-atualizar.txt para congelar um PC.
+
+O QUE ISSO NAO PROTEGE: erro de logica. Um codigo que compila mas esta
+errado vai ser instalado do mesmo jeito. Teste no seu PC antes de
+commitar - e o mesmo programa.
+
+ATENCAO: o repositorio manda em tudo, inclusive na qualidade e nas
+pastas de destino. Se voce editar o servidor.ps1 do PC dele na mao, na
+proxima abertura volta ao que esta no GitHub. Edite o repositorio.
+
+
+ONDE SALVAR
+-----------
+Abra servidor.ps1 e olhe as duas linhas no comeco do arquivo:
+
+    $PastaVideos  = ''
+    $PastaMusicas = ''
+
+Vazio = usa as pastas do proprio Windows (Videos\YouTube e
+Musicas\YouTube). E o padrao, e o melhor para ele: sao as pastas que o
+Explorer ja mostra na barra lateral, entao ele acha sozinho.
+
+Para mudar, escreva o caminho entre aspas, sem barra no final:
+
+    $PastaVideos  = 'D:\Videos do Vovo'
+    $PastaMusicas = 'C:\Users\Gmsan\Music\YouTube'
+
+A pasta e criada sozinha se nao existir. Se o caminho nao puder ser
+criado (HD externo desligado, pendrive fora, caminho digitado errado),
+ele volta calado para a pasta do Windows em vez de mostrar um erro que
+ele nao saberia resolver.
+
+De proposito isso NAO esta na tela. Escolher pasta e exatamente o tipo
+de decisao que trava um idoso no meio da tarefa. O botao "Ver o arquivo"
+resolve o problema de achar o video, sem ele precisar saber onde esta.
+
+
+QUALIDADE E TAMANHO
+-------------------
+Esta baixando em 720p no maximo, com video h264 e som aac. Isso e de
+proposito:
+
+  - 720p (1280x720) cobre a tela de qualquer notebook. A maioria dos
+    notebooks antigos e 1366x768, entao 1080p seria jogado fora.
+  - h264 tem decodificacao em hardware em praticamente todo notebook
+    desde 2010. AV1 e VP9, que o YouTube entrega por padrao hoje, NAO
+    tem - o video engasgaria num aparelho antigo.
+
+Tamanho aproximado por minuto de video:
+
+     1080p   ~15 MB/min     (um video de 14 min = 207 MB)
+      720p    ~7 MB/min     <-- escolhido
+      480p    ~4 MB/min
+
+Para mudar, abra servidor.ps1 e troque o numero na linha $Qualidade = 720
+la no comeco do arquivo. E a unica coisa que vale a pena mexer nele.
+
+
+SE MANUTENCAO
+-------------
+- O yt-dlp se atualiza sozinho. Na abertura, o programa olha a data do
+  yt-dlp.exe; se passou de 2 dias, roda "yt-dlp -U" numa janela invisivel
+  enquanto a tela mostra "Preparando", e recarimba a data. Sao uns 3 a 5
+  segundos, uma vez a cada 2 dias. E isso que mantem tudo funcionando
+  quando o YouTube muda alguma coisa.
+
+- O ffmpeg e o deno NAO se atualizam. Nao precisam: o ffmpeg mexe com
+  formatos de arquivo, que quase nao mudam. O deno so envelhece de
+  verdade se um dia o YouTube usar JavaScript mais novo do que ele
+  entende - isso levaria anos. Se acontecer, apague a pasta "dados" e
+  abra o programa de novo: ele rebaixa os tres na versao atual.
+
+- O GitHub e usado so como servidor de download dos 3 programas e para a
+  checagem de atualizacao. Nao precisa conta nem senha: e download publico
+  e anonimo. Os links do YouTube nunca passam pelo GitHub.
+
+  Diagnostico util: os downloads redirecionam de github.com para
+  release-assets.githubusercontent.com. Se um filtro de DNS, antivirus ou
+  controle parental bloquear "githubusercontent.com", a instalacao falha
+  enquanto o github.com parece estar normal. E um sintoma confuso.
+
+- A atualizacao falha em silencio de proposito. Se ele abrir o programa
+  sem internet, a checagem simplesmente nao acontece e ele baixa normal
+  quando a internet voltar. Preferi isso a mostrar um erro que ele nao
+  saberia o que fazer. O efeito colateral: se a atualizacao estiver
+  falhando sempre, ninguem fica sabendo. Se um dia parar de baixar
+  videos, o primeiro palpite e esse - apague "dados" e abra de novo.
+- Se um dia parar de funcionar: apague a pasta "dados" e abra de novo.
+  Ele baixa tudo novo.
+- Se voce mandar esta pasta por e-mail/WhatsApp, o Windows pode marcar os
+  arquivos como "da internet". Clique com o botao direito em cada arquivo
+  > Propriedades > marque "Desbloquear" > OK.
+- O programa se fecha sozinho 10 minutos depois que a janela do navegador
+  e fechada. Nao fica pesando no computador.
+
+Baixar video do YouTube contraria os termos de uso do YouTube. Uso pessoal,
+com conteudo que o proprio autor liberou ou de dominio publico, e o caminho
+tranquilo.

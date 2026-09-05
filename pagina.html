@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baixar vídeo</title>
+<style>
+  :root{
+    --verde:#12793a; --verde-esc:#0c5b2b;
+    --texto:#152029; --suave:#5d6c7b;
+    --borda:#ccd7e0; --fundo:#eef2f6; --cartao:#fff;
+    --vermelho:#c8281e;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; padding:24px; color-scheme:light;
+    background:var(--fundo); color:var(--texto);
+    font-family:"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+    font-size:20px; line-height:1.45;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #app{
+    width:100%; max-width:660px; background:var(--cartao);
+    border-radius:26px; padding:42px 38px 36px;
+    box-shadow:0 12px 44px rgba(20,40,60,.11);
+    text-align:center;
+  }
+  .tela[hidden]{display:none}
+
+  .marca{width:88px;height:62px;margin:0 auto 18px;background:var(--vermelho);border-radius:16px;
+         display:flex;align-items:center;justify-content:center}
+  .marca i{display:block;width:0;height:0;margin-left:6px;
+           border-left:24px solid #fff;border-top:15px solid transparent;border-bottom:15px solid transparent}
+
+  h1{font-size:34px;font-weight:600;margin:0 0 26px;letter-spacing:-.4px}
+  h2{font-size:30px;font-weight:600;margin:0 0 8px}
+
+  .instrucao{font-size:21px;color:var(--suave);margin:0 0 28px;line-height:1.35}
+
+  input{
+    width:100%; font:inherit; font-size:22px; padding:20px 22px; margin-top:22px;
+    border:3px solid var(--borda); border-radius:16px; background:#fbfcfd;
+    color:var(--texto); text-align:center; outline:none;
+  }
+  input::placeholder{color:#93a3b2}
+  input:focus{border-color:var(--verde);background:#fff}
+
+  .dica{min-height:28px;font-size:17px;color:var(--suave);margin:10px 0 4px}
+  .dica.alerta{color:var(--vermelho);font-weight:600}
+
+  .tipos{display:flex;gap:12px;margin:6px 0 22px}
+  .tipo{
+    flex:1; font:inherit; font-size:19px; padding:16px 8px; cursor:pointer;
+    border:3px solid var(--borda); border-radius:14px; background:#fbfcfd; color:var(--suave);
+  }
+  .tipo.ativo{border-color:var(--verde);background:#eaf6ee;color:var(--verde-esc);font-weight:600}
+
+  .grande{
+    width:100%; font:inherit; font-size:27px; font-weight:600; letter-spacing:.2px;
+    min-height:86px; padding:18px; cursor:pointer; color:#fff;
+    background:var(--verde); border:none; border-radius:18px;
+    box-shadow:0 6px 0 var(--verde-esc);
+  }
+  .grande:hover{background:#158942}
+  .grande:active{transform:translateY(4px);box-shadow:0 2px 0 var(--verde-esc)}
+  .grande:disabled{background:#a9b6c2;box-shadow:0 6px 0 #8d9aa6;cursor:default}
+
+  .discreto{
+    font:inherit;font-size:19px;margin-top:20px;padding:10px 18px;cursor:pointer;
+    background:none;border:none;color:var(--suave);text-decoration:underline;border-radius:10px;
+  }
+  .discreto:hover{color:var(--texto)}
+
+  .capa{width:100%;max-width:400px;border-radius:16px;margin:0 auto 20px;display:block;background:#e6ecf1;aspect-ratio:16/9;object-fit:cover}
+  .titulo{font-size:21px;color:var(--suave);margin:0 0 26px;
+          overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+
+  .barra{height:26px;background:#dde5ec;border-radius:99px;overflow:hidden;margin:8px 0 14px}
+  .barra>span{display:block;height:100%;width:0;background:var(--verde);border-radius:99px;transition:width .4s ease}
+  .porcento{font-size:46px;font-weight:700;letter-spacing:-1px}
+  .fase{font-size:20px;color:var(--suave)}
+
+  .selo{width:104px;height:104px;border-radius:50%;margin:0 auto 20px;display:flex;
+        align-items:center;justify-content:center;font-size:56px;color:#fff;background:var(--verde)}
+  .selo.ruim{background:#e0a52a}
+  .local{font-size:19px;color:var(--suave);margin:0 0 26px}
+  .local b{color:var(--texto);font-weight:600}
+</style>
+</head>
+<body>
+<main id="app">
+
+  <section id="tela-inicio" class="tela">
+    <div class="marca"><i></i></div>
+    <h1>Baixar do YouTube</h1>
+    <p class="instrucao">Copie o link no YouTube<br>e clique no botão</p>
+    <div class="tipos">
+      <button class="tipo ativo" data-tipo="video">🎬&nbsp; Vídeo</button>
+      <button class="tipo" data-tipo="audio">🎵&nbsp; Só a música</button>
+    </div>
+    <button id="botao" class="grande">Baixar</button>
+    <input id="link" type="text" inputmode="url" autocomplete="off" spellcheck="false"
+           placeholder="Cole o link aqui" hidden>
+    <div id="dica" class="dica"></div>
+  </section>
+
+  <section id="tela-preparo" class="tela" hidden>
+    <div class="marca"><i></i></div>
+    <h2>Preparando</h2>
+    <p class="fase" id="preparo-texto">Só na primeira vez. Pode demorar alguns minutos.</p>
+    <div class="barra"><span id="preparo-barra"></span></div>
+  </section>
+
+  <section id="tela-baixando" class="tela" hidden>
+    <img id="capa" class="capa" alt="">
+    <p class="titulo" id="baixando-titulo">&nbsp;</p>
+    <div class="porcento" id="porcento">0%</div>
+    <div class="barra"><span id="barra"></span></div>
+    <p class="fase" id="fase-texto">Baixando…</p>
+    <button id="cancelar" class="discreto">Cancelar</button>
+  </section>
+
+  <section id="tela-pronto" class="tela" hidden>
+    <div class="selo">✓</div>
+    <h2>Pronto!</h2>
+    <p class="titulo" id="pronto-titulo">&nbsp;</p>
+    <p class="local">Guardado em <b id="pronto-pasta">Vídeos</b></p>
+    <button id="abrir" class="grande">Ver o arquivo</button>
+    <button id="outro" class="discreto">Baixar outro</button>
+  </section>
+
+  <section id="tela-erro" class="tela" hidden>
+    <div class="selo ruim">!</div>
+    <h2>Não deu certo</h2>
+    <p class="titulo" id="erro-texto">&nbsp;</p>
+    <button id="tentar" class="grande">Tentar de novo</button>
+  </section>
+
+</main>
+
+<script>
+"use strict";
+
+var telas   = ["inicio","preparo","baixando","pronto","erro"];
+var campo   = document.getElementById("link");
+var dica    = document.getElementById("dica");
+var botao   = document.getElementById("botao");
+var tipo    = "video";
+var fase    = "parado";
+var congela = 0;   // ignora o estado do servidor por alguns instantes após uma ação
+
+function mostrar(nome){
+  for (var i=0;i<telas.length;i++){
+    document.getElementById("tela-"+telas[i]).hidden = (telas[i] !== nome);
+  }
+}
+
+function idDoVideo(u){
+  var m = String(u).match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function pareceLink(t){ return /^https?:\/\/\S+$/i.test(String(t).trim()); }
+
+/* ---------- tela inicial ---------- */
+
+// A caixa de texto fica escondida. Ela só aparece se o navegador não
+// deixar ler o que foi copiado — aí ela vira a única saída, e sem ela
+// ele ficaria sem nenhum jeito de informar o link.
+var campoAberto = false;
+
+campo.addEventListener("input", function(){ dica.textContent=""; dica.className="dica"; });
+campo.addEventListener("keydown", function(e){ if (e.key === "Enter") botao.click(); });
+
+var pilulas = document.querySelectorAll(".tipo");
+for (var i=0;i<pilulas.length;i++){
+  pilulas[i].addEventListener("click", function(){
+    for (var j=0;j<pilulas.length;j++) pilulas[j].classList.remove("ativo");
+    this.classList.add("ativo");
+    tipo = this.getAttribute("data-tipo");
+  });
+}
+
+botao.addEventListener("click", function(){
+  // se a caixa já apareceu e ele digitou algo, usa o que está nela
+  if (campo.value.trim()){ comecar(); return; }
+
+  if (navigator.clipboard && navigator.clipboard.readText){
+    navigator.clipboard.readText().then(function(t){
+      if (pareceLink(t)){ campo.value = t.trim(); comecar(); }
+      else { avisar("Copie o link do vídeo no YouTube e clique de novo."); }
+    }).catch(abrirCampo);
+  } else {
+    abrirCampo();
+  }
+});
+
+// só um aviso: ele esqueceu de copiar o link. A caixa não ajuda aqui.
+function avisar(t){ dica.textContent = t; dica.className = "dica alerta"; }
+
+// o navegador não deixa ler o que foi copiado (permissão negada ou
+// navegador antigo). Sem a caixa, o botão não teria como funcionar.
+function abrirCampo(){
+  campoAberto = true;
+  campo.hidden = false;
+  dica.textContent = "Clique na caixa e aperte Ctrl + V";
+  dica.className = "dica alerta";
+  campo.focus();
+}
+
+function comecar(){
+  var url = campo.value.trim();
+  if (!pareceLink(url)){ avisar("Esse não parece ser um link de vídeo."); return; }
+
+  var id = idDoVideo(url);
+  document.getElementById("capa").src = id ? ("https://i.ytimg.com/vi/"+id+"/hqdefault.jpg") : "";
+  document.getElementById("baixando-titulo").textContent = "";
+  document.getElementById("porcento").textContent = "0%";
+  document.getElementById("barra").style.width = "0%";
+  document.getElementById("fase-texto").textContent = "Baixando…";
+  mostrar("baixando");
+  congela = Date.now() + 2500;
+
+  fetch("/iniciar", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({url:url, tipo:tipo})
+  }).catch(falhouServidor);
+}
+
+/* ---------- botões das outras telas ---------- */
+
+document.getElementById("cancelar").addEventListener("click", function(){
+  congela = Date.now() + 2500;
+  fetch("/cancelar", {method:"POST"}).catch(function(){});
+  voltarAoInicio();
+});
+document.getElementById("outro").addEventListener("click", voltarAoInicio);
+document.getElementById("tentar").addEventListener("click", voltarAoInicio);
+document.getElementById("abrir").addEventListener("click", function(){
+  fetch("/abrir", {method:"POST"}).catch(function(){});
+});
+
+function voltarAoInicio(){
+  campo.value = "";
+  dica.textContent = ""; dica.className = "dica";
+  mostrar("inicio");
+  if (campoAberto) campo.focus();
+  congela = Date.now() + 1500;
+  fetch("/limpar", {method:"POST"}).catch(function(){});
+}
+
+/* ---------- conversa com o servidor ---------- */
+
+function falhouServidor(){
+  document.getElementById("erro-texto").textContent =
+    "O programa foi fechado. Feche esta janela e abra o Baixador de novo.";
+  mostrar("erro");
+}
+
+function perguntar(){
+  fetch("/estado", {cache:"no-store"})
+    .then(function(r){ return r.json(); })
+    .then(function(e){
+      if (Date.now() >= congela) aplicar(e);
+      setTimeout(perguntar, fase === "parado" ? 1500 : 600);
+    })
+    .catch(function(){
+      falhouServidor();
+      setTimeout(perguntar, 2000);
+    });
+}
+
+function aplicar(e){
+  fase = e.fase;
+
+  if (e.fase === "preparando"){
+    document.getElementById("preparo-barra").style.width = Math.max(2, e.pct) + "%";
+    if (e.texto) document.getElementById("preparo-texto").textContent = e.texto;
+    mostrar("preparo");
+    return;
+  }
+
+  if (e.fase === "baixando" || e.fase === "finalizando"){
+    document.getElementById("porcento").textContent = e.pct + "%";
+    document.getElementById("barra").style.width = e.pct + "%";
+    document.getElementById("fase-texto").textContent =
+      (e.fase === "finalizando") ? "Quase pronto…" : "Baixando…";
+    if (e.titulo) document.getElementById("baixando-titulo").textContent = e.titulo;
+    mostrar("baixando");
+    return;
+  }
+
+  if (e.fase === "pronto"){
+    document.getElementById("pronto-titulo").textContent = e.titulo || "";
+    // e.pasta só vem preenchido quando a pasta foi trocada no servidor.ps1
+    var onde = e.pasta;
+    if (!onde) onde = (e.tipo === "audio") ? "Músicas › YouTube" : "Vídeos › YouTube";
+    document.getElementById("pronto-pasta").textContent = onde;
+    mostrar("pronto");
+    return;
+  }
+
+  if (e.fase === "erro"){
+    document.getElementById("erro-texto").textContent = e.erro || "Tente outro link.";
+    mostrar("erro");
+    return;
+  }
+
+  mostrar("inicio");
+}
+
+mostrar("inicio");
+perguntar();
+</script>
+</body>
+</html>

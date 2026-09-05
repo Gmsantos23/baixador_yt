@@ -1,0 +1,10 @@
+# Guarda os arquivos byte a byte, sem o Git converter fim de linha.
+#
+# Isso NAO e preferencia de estilo: a auto-atualizacao compara o arquivo
+# do disco com o do GitHub por hash. Se o Git guardasse LF e o Windows
+# gravasse CRLF, os dois nunca seriam iguais e o programa se "atualizaria"
+# em toda abertura, baixando e reiniciando a toa.
+#
+# Tambem mantem o Baixador.vbs em CRLF, que e o mais seguro para o
+# Windows Script Host caso alguem baixe o ZIP do repositorio.
+* -text

@@ -1,0 +1,5 @@
+# Tudo que o programa baixa ou gera sozinho no PC de quem usa.
+# Nunca deve ir para o repositorio: sao 388 MB, e o ffmpeg.exe sozinho
+# tem 139 MB - acima do limite de 100 MB por arquivo do GitHub.
+# O programa rebaixa tudo isso na primeira abertura.
+dados/
